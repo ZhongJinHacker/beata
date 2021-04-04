@@ -12,9 +12,11 @@
 
     <modules>
         <module>beata-local</module>
-        <module>beata-sync</module>
-        <module>beata-at</module>
         <module>beata-local-tx-test</module>
+        <module>beata-sync</module>
+        <module>beata-sync-server</module>
+        <module>beata-sync-tx-test</module>
+        <module>beata-at</module>
     </modules>
 
     <properties>
