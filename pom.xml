@@ -14,7 +14,7 @@
         <module>beata-local</module>
         <module>beata-sync</module>
         <module>beata-at</module>
-        <module>beata-test</module>
+        <module>beata-local-tx-test</module>
     </modules>
 
     <properties>
