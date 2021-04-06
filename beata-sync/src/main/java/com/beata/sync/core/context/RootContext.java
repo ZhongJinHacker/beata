@@ -24,4 +24,8 @@ public class RootContext {
     public static void setXID(String xid) {
         CONTEXT_HOLDER.get().put(KEY_XID, xid);
     }
+
+    public static void clearXid() {
+        CONTEXT_HOLDER.get().remove(KEY_XID);
+    }
 }

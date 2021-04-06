@@ -1,11 +1,10 @@
 package com.beata.sync;
 
 import com.beata.sync.aspect.GlobalSyncTransactionAspect;
-import com.beata.sync.tm.properties.BeataServerProperties;
+import com.beata.sync.properties.BeataServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 
 @ComponentScan(basePackages = {"com.beata.sync"})
 @Configuration

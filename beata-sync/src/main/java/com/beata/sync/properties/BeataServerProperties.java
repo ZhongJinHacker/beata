@@ -1,4 +1,4 @@
-package com.beata.sync.tm.properties;
+package com.beata.sync.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

@@ -1,4 +1,4 @@
-package com.beata.sync.tm.client;
+package com.beata.sync.rm.cilent;
 
 import com.alibaba.fastjson.JSON;
 import com.beata.sync.model.MessageFuture;
@@ -11,17 +11,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class TmClientHandler extends ChannelInboundHandlerAdapter {
+public class RmClientHandler extends ChannelInboundHandlerAdapter {
 
     private ChannelHandlerContext context;
 
     protected final ConcurrentHashMap<Integer, MessageFuture> futures = new ConcurrentHashMap<>();
 
     AtomicInteger idGenerator = new AtomicInteger(0);
-
-    public TmClientHandler() {
-        super();
-    }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -39,18 +35,21 @@ public class TmClientHandler extends ChannelInboundHandlerAdapter {
         messageFuture.setResultMessage(response);
     }
 
-    public Object createGlobalTransaction() {
+    public boolean branchTransactionCommit(String xid) {
         RpcRequest rpcRequest = new RpcRequest();
-        rpcRequest.setCmd("createXid");
+        rpcRequest.setCmd("commitBranch");
         rpcRequest.setId(idGenerator.getAndIncrement());
+        rpcRequest.setXid(xid);
+
 
         MessageFuture messageFuture = new MessageFuture();
         messageFuture.setResultMessage(rpcRequest);
         futures.put(rpcRequest.getId(), messageFuture);
         context.writeAndFlush(JSON.toJSONString(rpcRequest));
+
         try {
-            Object ret = messageFuture.get();
-            return ret;
+            RpcResponse ret = (RpcResponse)messageFuture.get();
+            return ret.getSuccess();
         } catch (ExecutionException e) {
             e.printStackTrace();
             throw new RuntimeException("get xid error: " + e);
@@ -60,39 +59,21 @@ public class TmClientHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    public void commitGlobalTransaction(String xid) {
+    public boolean branchTransactionRollback(String xid) {
         RpcRequest rpcRequest = new RpcRequest();
-        rpcRequest.setCmd("commitXid");
+        rpcRequest.setCmd("rollbackBranch");
         rpcRequest.setId(idGenerator.getAndIncrement());
         rpcRequest.setXid(xid);
+
 
         MessageFuture messageFuture = new MessageFuture();
         messageFuture.setResultMessage(rpcRequest);
         futures.put(rpcRequest.getId(), messageFuture);
         context.writeAndFlush(JSON.toJSONString(rpcRequest));
-        try {
-            Object ret = messageFuture.get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-            throw new RuntimeException("get xid error: " + e);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            throw new RuntimeException("InterruptedException, get xid error: " + e);
-        }
-    }
 
-    public void rollbackGlobalTransaction(String xid) {
-        RpcRequest rpcRequest = new RpcRequest();
-        rpcRequest.setCmd("rollbackXid");
-        rpcRequest.setId(idGenerator.getAndIncrement());
-        rpcRequest.setXid(xid);
-
-        MessageFuture messageFuture = new MessageFuture();
-        messageFuture.setResultMessage(rpcRequest);
-        futures.put(rpcRequest.getId(), messageFuture);
-        context.writeAndFlush(JSON.toJSONString(rpcRequest));
         try {
-            Object ret = messageFuture.get();
+            RpcResponse ret = (RpcResponse)messageFuture.get();
+            return ret.getSuccess();
         } catch (ExecutionException e) {
             e.printStackTrace();
             throw new RuntimeException("get xid error: " + e);
@@ -102,4 +83,3 @@ public class TmClientHandler extends ChannelInboundHandlerAdapter {
         }
     }
 }
-

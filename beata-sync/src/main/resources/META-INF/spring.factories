@@ -1,3 +1,4 @@
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.beata.sync.BeataSyncTxConfiguration
+com.beata.sync.BeataSyncTxConfiguration\
+com.beata.sync.BeataHttpConfiguration

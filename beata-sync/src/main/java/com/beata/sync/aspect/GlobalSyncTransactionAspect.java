@@ -1,10 +1,11 @@
 package com.beata.sync.aspect;
 
 import com.beata.sync.annotations.GlobalSyncTransaction;
+import com.beata.sync.rm.cilent.RmClient;
 import com.beata.sync.tm.api.GlobalSyncTransactionContext;
 import com.beata.sync.tm.api.SyncTypeGlobalTransaction;
 import com.beata.sync.tm.client.TmClient;
-import com.beata.sync.tm.properties.BeataServerProperties;
+import com.beata.sync.properties.BeataServerProperties;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -49,5 +50,6 @@ public class GlobalSyncTransactionAspect implements InitializingBean {
 
     private void init() {
         TmClient.getInstance().init(serverProperties.getHost(), Integer.parseInt(serverProperties.getPort()));
+        RmClient.getInstance().init(serverProperties.getHost(), Integer.parseInt(serverProperties.getPort()));
     }
 }
