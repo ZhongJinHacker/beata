@@ -1,12 +1,15 @@
 package com.beata.sync.server;
 
-import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.channel.Channel;
 import lombok.Data;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class BranchChannel {
 
-    NioSocketChannel channel;
+    Channel channel;
 
-    String branchStatus;
+    Set<Integer> requestIds = new HashSet<>();
 }

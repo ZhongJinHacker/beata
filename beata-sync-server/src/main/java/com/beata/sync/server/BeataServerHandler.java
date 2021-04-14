@@ -12,15 +12,14 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BeataServerHandler extends ChannelInboundHandlerAdapter {
 
     private static ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
-    private static final Map<String, BranchChannel> xidBranchMap = new ConcurrentHashMap<>();
+    private static final Map<String, List<BranchChannel>> xidBranchMap = new ConcurrentHashMap<>();
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -48,20 +47,42 @@ public class BeataServerHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
-        if (cmd.equals(CmdConstants.CREATE_XID)) {
+        if (cmd.equals(CmdConstants.RequestCmd.CREATE_XID)) {
             handleCreateXid(ctx, request);
-        } else if (cmd.equals(CmdConstants.COMMIT_XID)) {
-
-        } else if (cmd.equals(CmdConstants.ROLLBACK_XID)) {
-
-        } else if (cmd.equals(CmdConstants.COMMIT_BRANCH)) {
-
-        } else if (cmd.equals(CmdConstants.ROLLBACK_BRANCH)) {
-
+        } else if (cmd.equals(CmdConstants.RequestCmd.COMMIT_XID)) {
+            handleCommitXid(ctx, request);
+        } else if (cmd.equals(CmdConstants.RequestCmd.ROLLBACK_XID)) {
+            handleRollbackXid(ctx, request);
+        } else if (cmd.equals(CmdConstants.RequestCmd.COMMIT_BRANCH)) {
+            handleBranchCommit(ctx, request);
+        } else if (cmd.equals(CmdConstants.RequestCmd.ROLLBACK_BRANCH)) {
+            handleBranchRollback(ctx, request);
         } else {
             throw new RuntimeException("illegal cmd!");
         }
     }
+
+    private void handleBranchRollback(ChannelHandlerContext ctx, RpcRequest request) {
+        List<BranchChannel> branchChannels = xidBranchMap.get(request.getXid());
+        synchronized (xidBranchMap) {
+            BranchChannel branchChannel = new BranchChannel();
+            branchChannel.setChannel(ctx.channel());
+            branchChannel.getRequestIds().add(request.getId());
+            branchChannels.add(branchChannel);
+        }
+
+    }
+
+    private void handleBranchCommit(ChannelHandlerContext ctx, RpcRequest request) {
+        List<BranchChannel> branchChannels = xidBranchMap.get(request.getXid());
+        synchronized (xidBranchMap) {
+            BranchChannel branchChannel = new BranchChannel();
+            branchChannel.setChannel(ctx.channel());
+            branchChannel.getRequestIds().add(request.getId());
+            branchChannels.add(branchChannel);
+        }
+    }
+
 
     private void handleCreateXid(ChannelHandlerContext ctx, RpcRequest request) {
         String xid = UUID.randomUUID().toString();
@@ -71,5 +92,38 @@ public class BeataServerHandler extends ChannelInboundHandlerAdapter {
         response.setSuccess(true);
         response.setFromId(request.getId());
         ctx.channel().writeAndFlush(JSON.toJSONString(response));
+
+        List<BranchChannel> branchChannels = new ArrayList<>();
+        xidBranchMap.put(xid, branchChannels);
+    }
+
+    private void handleCommitXid(ChannelHandlerContext ctx, RpcRequest request) {
+        List<BranchChannel> branchChannels = xidBranchMap.get(request.getXid());
+        for (BranchChannel channel : branchChannels) {
+            for (Integer requestId : channel.requestIds) {
+                RpcResponse response = new RpcResponse();
+                response.setXid(request.getXid());
+                response.setSuccess(true);
+                response.setFromId(requestId);
+                response.setResponseCmd(CmdConstants.ResponseCmd.BRANCH_COMMIT);
+                channel.getChannel().writeAndFlush(JSON.toJSONString(response));
+            }
+        }
+        xidBranchMap.remove(request.getXid());
+    }
+
+    private void handleRollbackXid(ChannelHandlerContext ctx, RpcRequest request) {
+        List<BranchChannel> branchChannels = xidBranchMap.get(request.getXid());
+        for (BranchChannel channel : branchChannels) {
+            for (Integer requestId : channel.requestIds) {
+                RpcResponse response = new RpcResponse();
+                response.setXid(request.getXid());
+                response.setSuccess(true);
+                response.setFromId(requestId);
+                response.setResponseCmd(CmdConstants.ResponseCmd.BRANCH_ROLLBACK);
+                channel.getChannel().writeAndFlush(JSON.toJSONString(response));
+            }
+        }
+        xidBranchMap.remove(request.getXid());
     }
 }

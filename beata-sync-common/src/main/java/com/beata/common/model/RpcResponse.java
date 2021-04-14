@@ -10,4 +10,6 @@ public class RpcResponse {
     private String xid;
 
     private Boolean success;
+
+    private String responseCmd;
 }

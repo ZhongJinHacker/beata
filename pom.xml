@@ -15,9 +15,9 @@
         <module>beata-local-tx-test</module>
         <module>beata-sync</module>
         <module>beata-sync-server</module>
-        <module>beata-sync-tx-test</module>
-        <module>beata-at</module>
         <module>beata-sync-common</module>
+        <module>beata-sync-tx-test/order-service</module>
+        <module>beata-sync-tx-test/stock-service</module>
     </modules>
 
     <properties>
