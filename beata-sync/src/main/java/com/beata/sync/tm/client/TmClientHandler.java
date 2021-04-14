@@ -1,9 +1,9 @@
 package com.beata.sync.tm.client;
 
 import com.alibaba.fastjson.JSON;
+import com.beata.common.model.RpcRequest;
+import com.beata.common.model.RpcResponse;
 import com.beata.sync.model.MessageFuture;
-import com.beata.sync.model.RpcRequest;
-import com.beata.sync.model.RpcResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -31,68 +31,35 @@ public class TmClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (!(msg instanceof RpcResponse)) {
-            return;
-        }
-        RpcResponse response = (RpcResponse)msg;
+        RpcResponse response =  JSON.parseObject((String)msg, RpcResponse.class);
         MessageFuture messageFuture = futures.remove(response.getFromId());
         messageFuture.setResultMessage(response);
     }
 
-    public Object createGlobalTransaction() {
-        RpcRequest rpcRequest = new RpcRequest();
-        rpcRequest.setCmd("createXid");
-        rpcRequest.setId(idGenerator.getAndIncrement());
-
-        MessageFuture messageFuture = new MessageFuture();
-        messageFuture.setResultMessage(rpcRequest);
-        futures.put(rpcRequest.getId(), messageFuture);
-        context.writeAndFlush(JSON.toJSONString(rpcRequest));
-        try {
-            Object ret = messageFuture.get();
-            return ret;
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-            throw new RuntimeException("get xid error: " + e);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            throw new RuntimeException("InterruptedException, get xid error: " + e);
-        }
+    public RpcResponse createGlobalTransaction() {
+        return sendTmCmd("createXid", null);
     }
 
     public void commitGlobalTransaction(String xid) {
-        RpcRequest rpcRequest = new RpcRequest();
-        rpcRequest.setCmd("commitXid");
-        rpcRequest.setId(idGenerator.getAndIncrement());
-        rpcRequest.setXid(xid);
-
-        MessageFuture messageFuture = new MessageFuture();
-        messageFuture.setResultMessage(rpcRequest);
-        futures.put(rpcRequest.getId(), messageFuture);
-        context.writeAndFlush(JSON.toJSONString(rpcRequest));
-        try {
-            Object ret = messageFuture.get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-            throw new RuntimeException("get xid error: " + e);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            throw new RuntimeException("InterruptedException, get xid error: " + e);
-        }
+        sendTmCmd("commitXid", xid);
     }
 
     public void rollbackGlobalTransaction(String xid) {
+        sendTmCmd("rollbackXid", xid);
+    }
+
+    private RpcResponse sendTmCmd(String cmd, String xid) {
         RpcRequest rpcRequest = new RpcRequest();
-        rpcRequest.setCmd("rollbackXid");
+        rpcRequest.setCmd(cmd);
         rpcRequest.setId(idGenerator.getAndIncrement());
         rpcRequest.setXid(xid);
 
         MessageFuture messageFuture = new MessageFuture();
-        messageFuture.setResultMessage(rpcRequest);
+        messageFuture.setRpcRequest(rpcRequest);
         futures.put(rpcRequest.getId(), messageFuture);
         context.writeAndFlush(JSON.toJSONString(rpcRequest));
         try {
-            Object ret = messageFuture.get();
+            return (RpcResponse) messageFuture.get();
         } catch (ExecutionException e) {
             e.printStackTrace();
             throw new RuntimeException("get xid error: " + e);

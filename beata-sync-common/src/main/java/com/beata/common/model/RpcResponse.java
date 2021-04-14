@@ -1,4 +1,4 @@
-package com.beata.sync.model;
+package com.beata.common.model;
 
 import lombok.Data;
 

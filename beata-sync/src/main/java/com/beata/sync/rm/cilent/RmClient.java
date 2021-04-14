@@ -1,7 +1,5 @@
 package com.beata.sync.rm.cilent;
 
-import com.beata.sync.tm.client.TmClient;
-import com.beata.sync.tm.client.TmClientHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;

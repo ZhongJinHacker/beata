@@ -1,5 +1,6 @@
 package com.beata.sync.tm.client;
 
+import com.beata.common.model.RpcResponse;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -56,7 +57,8 @@ public class TmClient {
     }
 
     public String beginGlobalTransaction() {
-        return (String) handler.createGlobalTransaction();
+        RpcResponse response = handler.createGlobalTransaction();
+        return response.getXid();
     }
 
     public void commitGlobalTransaction(String xid) {

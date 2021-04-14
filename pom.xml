@@ -17,6 +17,7 @@
         <module>beata-sync-server</module>
         <module>beata-sync-tx-test</module>
         <module>beata-at</module>
+        <module>beata-sync-common</module>
     </modules>
 
     <properties>
@@ -87,6 +88,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.2.2.RELEASE</version>
                 <configuration>
                     <fork>true</fork>
                     <addResources>true</addResources>

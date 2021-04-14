@@ -1,9 +1,9 @@
 package com.beata.sync.rm.cilent;
 
 import com.alibaba.fastjson.JSON;
+import com.beata.common.model.RpcRequest;
+import com.beata.common.model.RpcResponse;
 import com.beata.sync.model.MessageFuture;
-import com.beata.sync.model.RpcRequest;
-import com.beata.sync.model.RpcResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -36,38 +36,21 @@ public class RmClientHandler extends ChannelInboundHandlerAdapter {
     }
 
     public boolean branchTransactionCommit(String xid) {
-        RpcRequest rpcRequest = new RpcRequest();
-        rpcRequest.setCmd("commitBranch");
-        rpcRequest.setId(idGenerator.getAndIncrement());
-        rpcRequest.setXid(xid);
-
-
-        MessageFuture messageFuture = new MessageFuture();
-        messageFuture.setResultMessage(rpcRequest);
-        futures.put(rpcRequest.getId(), messageFuture);
-        context.writeAndFlush(JSON.toJSONString(rpcRequest));
-
-        try {
-            RpcResponse ret = (RpcResponse)messageFuture.get();
-            return ret.getSuccess();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-            throw new RuntimeException("get xid error: " + e);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            throw new RuntimeException("InterruptedException, get xid error: " + e);
-        }
+        return sendBranchCmd("commitBranch", xid);
     }
 
     public boolean branchTransactionRollback(String xid) {
+        return sendBranchCmd("rollbackBranch", xid);
+    }
+
+    private boolean sendBranchCmd(String cmd, String xid) {
         RpcRequest rpcRequest = new RpcRequest();
-        rpcRequest.setCmd("rollbackBranch");
+        rpcRequest.setCmd(cmd);
         rpcRequest.setId(idGenerator.getAndIncrement());
         rpcRequest.setXid(xid);
 
-
         MessageFuture messageFuture = new MessageFuture();
-        messageFuture.setResultMessage(rpcRequest);
+        messageFuture.setRpcRequest(rpcRequest);
         futures.put(rpcRequest.getId(), messageFuture);
         context.writeAndFlush(JSON.toJSONString(rpcRequest));
 
