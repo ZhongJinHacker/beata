@@ -10,7 +10,7 @@ public class OrderService {
     @Autowired
     private OrderMapper orderMapper;
 
-    @GlobalSyncTransaction
+    //@GlobalSyncTransaction
     public void doOrder() {
         orderMapper.insert("jiang123");
     }

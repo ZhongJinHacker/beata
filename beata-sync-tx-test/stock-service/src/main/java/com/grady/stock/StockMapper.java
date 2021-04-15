@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StockMapper {
 
-    @Insert("insert into stock_test(name) values(#{name})")
+    @Insert("insert into stock(name) values(#{name})")
     void insert(@Param("name") String name);
 }

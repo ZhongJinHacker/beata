@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OrderMapper {
 
-    @Insert("insert into order_test(name) values(#{name})")
+    @Insert("insert into `order`(name) values(#{name})")
     void insert(@Param("name") String name);
 
 }
