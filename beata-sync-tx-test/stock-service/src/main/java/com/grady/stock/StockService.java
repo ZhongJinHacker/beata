@@ -11,5 +11,7 @@ public class StockService {
 
     public void doStock() {
         stockMapper.insert("hello world111");
+        int i = 1/0;
+        System.out.println();
     }
 }
