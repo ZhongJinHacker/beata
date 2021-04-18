@@ -27,12 +27,15 @@ public class RmClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (!(msg instanceof RpcResponse)) {
-            return;
-        }
-        RpcResponse response = (RpcResponse)msg;
+        RpcResponse response =  JSON.parseObject((String)msg, RpcResponse.class);
         MessageFuture messageFuture = futures.remove(response.getFromId());
-        messageFuture.setResultMessage(response);
+        if (messageFuture != null) {
+            messageFuture.setResultMessage(response);
+        }
+    }
+
+    public void branchTransactionBegin(String xid) {
+        sendBranchCmd("beginBranch", xid);
     }
 
     public boolean branchTransactionCommit(String xid) {

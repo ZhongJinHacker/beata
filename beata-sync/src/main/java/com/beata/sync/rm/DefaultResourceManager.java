@@ -4,8 +4,8 @@ import com.beata.sync.rm.cilent.RmClient;
 
 public class DefaultResourceManager {
 
-    public static void branchTransactionBegin() {
-
+    public static void branchTransactionBegin(String xid) {
+        RmClient.getInstance().branchTransactionBegin(xid);
     }
 
     public static boolean branchTransactionCommit(String xid) {

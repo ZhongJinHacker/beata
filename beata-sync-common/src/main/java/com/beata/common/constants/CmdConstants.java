@@ -9,6 +9,8 @@ public class CmdConstants {
 
         public static final String ROLLBACK_XID = "rollbackXid";
 
+        public static final String BEGIN_BRANCH = "beginBranch";
+
         public static final String COMMIT_BRANCH = "commitBranch";
 
         public static final String ROLLBACK_BRANCH = "rollbackBranch";

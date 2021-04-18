@@ -61,4 +61,10 @@ public class RmClient {
     public boolean branchTransactionRollback(String xid) {
         return handler.branchTransactionRollback(xid);
     }
+
+
+    public void branchTransactionBegin(String xid) {
+        handler.branchTransactionBegin(xid);
+
+    }
 }

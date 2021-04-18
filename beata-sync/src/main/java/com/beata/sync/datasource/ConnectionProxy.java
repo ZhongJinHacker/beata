@@ -47,6 +47,7 @@ public class ConnectionProxy implements Connection {
 
     @Override
     public boolean getAutoCommit() throws SQLException {
+        connection.setAutoCommit(false);
         return connection.getAutoCommit();
     }
 
