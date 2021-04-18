@@ -46,7 +46,7 @@ public class TmClientHandler extends ChannelInboundHandlerAdapter {
     }
 
     public void rollbackGlobalTransaction(String xid) {
-        sendTmCmd(CmdConstants.RequestCmd.COMMIT_XID, xid);
+        sendTmCmd(CmdConstants.RequestCmd.ROLLBACK_XID, xid);
     }
 
     private RpcResponse sendTmCmd(String cmd, String xid) {

@@ -12,8 +12,9 @@ public class OrderService {
     private OrderMapper orderMapper;
 
     @GlobalSyncTransaction
-    @Transactional
     public void doOrder() {
         orderMapper.insert("jiang123");
+        int i = 1/0;
+        System.out.println(i);
     }
 }

@@ -38,7 +38,7 @@ public class GlobalSyncTransactionAspect implements InitializingBean {
             tx.commitTransaction();
         } catch (Throwable throwable) {
             tx.rollbackTransaction();
-            throwable.printStackTrace();
+            throw throwable;
         }
         return ret;
     }

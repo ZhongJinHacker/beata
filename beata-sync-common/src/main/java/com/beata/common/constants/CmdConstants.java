@@ -17,9 +17,13 @@ public class CmdConstants {
     }
 
     public static class ResponseCmd {
-        public static final String BRANCH_COMMIT = "ACTiON_BRANCH_COMMIT";
+        public static final String BRANCH_COMMIT = "ACTION_BRANCH_COMMIT";
 
-        public static final String BRANCH_ROLLBACK = "ACTiON_BRANCH_COMMIT";
+        public static final String BRANCH_ROLLBACK = "ACTION_BRANCH_COMMIT";
+
+        public static final String XID_COMMIT = "ACTION_XID_COMMIT";
+
+        public static final String XID_ROLLBACK = "ACTION_XID_ROLLBACK";
 
     }
 }

@@ -65,13 +65,25 @@ public class BeataServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void handleBranchRollback(ChannelHandlerContext ctx, RpcRequest request) {
-        xidStatusMap.put(request.getXid(), CmdConstants.RequestCmd.ROLLBACK_XID);
-        RpcResponse response = new RpcResponse();
-        response.setXid(request.getXid());
-        response.setSuccess(false);
-        response.setFromId(request.getId());
-        response.setResponseCmd(CmdConstants.ResponseCmd.BRANCH_ROLLBACK);
-        ctx.channel().writeAndFlush(JSON.toJSONString(response));
+        String status = xidStatusMap.get(request.getXid());
+        if (CmdConstants.RequestCmd.COMMIT_XID.equals(status)) {
+            throw new RuntimeException("illegal logic");
+        } else if (CmdConstants.RequestCmd.ROLLBACK_XID.equals(status)) {
+            RpcResponse response = new RpcResponse();
+            response.setXid(request.getXid());
+            response.setSuccess(false);
+            response.setFromId(request.getId());
+            response.setResponseCmd(CmdConstants.ResponseCmd.BRANCH_ROLLBACK);
+            ctx.channel().writeAndFlush(JSON.toJSONString(response));
+        } else {
+            List<BranchChannel> branchChannels = xidBranchMap.get(request.getXid());
+            synchronized (xidBranchMap) {
+                BranchChannel branchChannel = new BranchChannel();
+                branchChannel.setChannel(ctx.channel());
+                branchChannel.getRequestIds().add(request.getId());
+                branchChannels.add(branchChannel);
+            }
+        }
     }
 
     private void handleBranchCommit(ChannelHandlerContext ctx, RpcRequest request) {
@@ -132,6 +144,13 @@ public class BeataServerHandler extends ChannelInboundHandlerAdapter {
             }
         }
         xidBranchMap.put(request.getXid(), new ArrayList<>());
+
+        RpcResponse response = new RpcResponse();
+        response.setXid(request.getXid());
+        response.setSuccess(true);
+        response.setFromId(request.getId());
+        response.setResponseCmd(CmdConstants.ResponseCmd.XID_COMMIT);
+        ctx.channel().writeAndFlush(JSON.toJSONString(response));
     }
 
     private void handleRollbackXid(ChannelHandlerContext ctx, RpcRequest request) {
@@ -141,12 +160,20 @@ public class BeataServerHandler extends ChannelInboundHandlerAdapter {
             for (Integer requestId : channel.requestIds) {
                 RpcResponse response = new RpcResponse();
                 response.setXid(request.getXid());
-                response.setSuccess(true);
+                response.setSuccess(false);
                 response.setFromId(requestId);
                 response.setResponseCmd(CmdConstants.ResponseCmd.BRANCH_ROLLBACK);
                 channel.getChannel().writeAndFlush(JSON.toJSONString(response));
             }
         }
         xidBranchMap.remove(request.getXid());
+
+
+        RpcResponse response = new RpcResponse();
+        response.setXid(request.getXid());
+        response.setSuccess(true);
+        response.setFromId(request.getId());
+        response.setResponseCmd(CmdConstants.ResponseCmd.XID_ROLLBACK);
+        ctx.channel().writeAndFlush(JSON.toJSONString(response));
     }
 }
